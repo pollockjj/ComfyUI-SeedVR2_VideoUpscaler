@@ -6,7 +6,7 @@ Configure VAE (Variational Autoencoder) model with tiling support
 from comfy_api.latest import io
 from typing import Dict, Any, Tuple
 from ..utils.model_registry import get_available_vae_models, DEFAULT_VAE
-from ..utils.comfy_context import get_current_node_id
+from ..utils.comfy_context import require_node_id_for_cache
 from ..utils.tile_debug import normalize_tile_debug
 from ..optimization.memory_manager import get_device_list
 
@@ -201,6 +201,7 @@ class SeedVR2LoadVAEModel(io.ComfyNode):
                 "Please set offload_device to specify where the cached VAE model should be stored "
                 "(e.g., 'cpu' or another device). Set cache_model=False if you don't want to cache the model."
             )
+        node_id = require_node_id_for_cache(cache_model, "VAE")
         tile_debug = normalize_tile_debug(tile_debug)
         
         config = {
@@ -216,6 +217,6 @@ class SeedVR2LoadVAEModel(io.ComfyNode):
             "decode_tile_overlap": decode_tile_overlap,
             "tile_debug": tile_debug,
             "torch_compile_args": torch_compile_args,
-            "node_id": get_current_node_id(),
+            "node_id": node_id,
         }
         return io.NodeOutput(config)
