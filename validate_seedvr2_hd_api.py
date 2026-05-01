@@ -98,6 +98,21 @@ def assert_subset(actual: dict[str, Any], expected: dict[str, Any], label: str) 
             fail(f"{label}.{key} expected {value!r}, got {actual.get(key)!r}")
 
 
+def validated_api_class_types(api: Any) -> list[str]:
+    if not isinstance(api, dict):
+        fail(f"API prompt root must be an object, got {type(api).__name__}")
+
+    class_types: list[str] = []
+    for node_id, node in api.items():
+        if not isinstance(node, dict):
+            fail(f"API node {node_id!r} must be an object, got {type(node).__name__}")
+        class_type = node.get("class_type")
+        if not isinstance(class_type, str):
+            fail(f"API node {node_id!r} missing string class_type")
+        class_types.append(class_type)
+    return sorted(class_types)
+
+
 def contains_literal_value(node: Any, expected: Any) -> bool:
     if isinstance(node, dict):
         return any(contains_literal_value(value, expected) for value in node.values())
@@ -164,7 +179,7 @@ def main() -> int:
     api = load_json(args.api)
     assert_source_widgets(source)
 
-    class_types = sorted(node["class_type"] for node in api.values())
+    class_types = validated_api_class_types(api)
     forbidden_present = sorted(set(class_types) & set(FORBIDDEN_CLASS_TYPES))
     if forbidden_present:
         fail(f"forbidden class_type entries present: {forbidden_present}")
