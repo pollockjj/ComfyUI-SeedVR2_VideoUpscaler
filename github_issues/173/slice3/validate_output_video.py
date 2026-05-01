@@ -43,5 +43,12 @@ def main(path: str) -> int:
     return 0
 
 
+def cli(argv: list[str]) -> int:
+    if len(argv) != 1:
+        print("usage: validate_output_video.py <output_video_ffprobe.json>", file=sys.stderr)
+        return 2
+    return main(argv[0])
+
+
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv[1]))
+    raise SystemExit(cli(sys.argv[1:]))

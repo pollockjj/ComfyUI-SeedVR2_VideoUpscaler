@@ -34,5 +34,12 @@ def main(smoke_path: str, stop_packet_path: str) -> int:
     return 0
 
 
+def cli(argv: list[str]) -> int:
+    if len(argv) != 2:
+        print("usage: validate_no_fallback.py <torch_share_smoke.json> <torch_share_stop_packet.md>", file=sys.stderr)
+        return 2
+    return main(argv[0], argv[1])
+
+
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv[1], sys.argv[2]))
+    raise SystemExit(cli(sys.argv[1:]))
