@@ -89,7 +89,6 @@ def main() -> int:
     source = load_json(args.source)
     api = load_json(args.api)
 
-    source_types = sorted(node["type"] for node in source["nodes"])
     class_types = sorted(node["class_type"] for node in api.values())
     if class_types != sorted(REQUIRED_CLASS_TYPES):
         fail(f"class_type set mismatch: {class_types}")
@@ -128,7 +127,6 @@ def main() -> int:
     result = {
         "source_workflow": str(args.source),
         "api_workflow": str(args.api),
-        "source_types": source_types,
         "forbidden_class_types": FORBIDDEN_CLASS_TYPES,
         "required_class_types": REQUIRED_CLASS_TYPES,
         "api_class_types": class_types,
