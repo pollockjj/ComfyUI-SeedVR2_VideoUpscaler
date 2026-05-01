@@ -14,7 +14,7 @@ def _require_cache_node_id(config: Dict[str, Any], model_kind: str) -> str:
             f"{model_kind} cache access requires a non-None node_id when "
             "cache_model=True."
         )
-    return node_id
+    return str(node_id)
 
 
 class GlobalModelCache:
@@ -185,6 +185,8 @@ class GlobalModelCache:
             Also removes any runner templates that used this DiT model
         """
         node_id = dit_config.get('node_id')
+        if node_id is not None:
+            node_id = str(node_id)
         if node_id in self._dit_models:
             if debug:
                 debug.log(f"Removing cached DiT: {node_id}", category="cache", force=True)
@@ -220,6 +222,8 @@ class GlobalModelCache:
             Also removes any runner templates that used this VAE model
         """
         node_id = vae_config.get('node_id')
+        if node_id is not None:
+            node_id = str(node_id)
         if node_id in self._vae_models:
             if debug:
                 debug.log(f"Removing cached VAE: {node_id}", category="cache", force=True)

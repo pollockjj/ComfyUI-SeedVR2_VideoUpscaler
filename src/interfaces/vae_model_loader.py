@@ -120,9 +120,10 @@ class SeedVR2LoadVAEModel(io.ComfyNode):
                     optional=True,
                     tooltip=(
                         "Tile debug visualization mode:\n"
-                        "• false: No visualization overlay (default)\n"
+                        "• 'false': No visualization overlay (default)\n"
                         "• 'encode': Show encoding tile boundaries\n"
                         "• 'decode': Show decoding tile boundaries\n"
+                        "API boolean False is normalized to 'false'.\n"
                         "\n"
                         "Only works when respective tiling is enabled."
                     )
