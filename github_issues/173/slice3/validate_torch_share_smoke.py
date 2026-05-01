@@ -21,7 +21,7 @@ def resolve_evidence_path(value: str) -> Path:
 
 
 def main(path: str) -> int:
-    data = json.loads(Path(path).read_text())
+    data = json.loads(Path(path).read_text(encoding="utf-8"))
     expected = {
         "manifest_share_torch": True,
         "execution_model": "host-coupled",

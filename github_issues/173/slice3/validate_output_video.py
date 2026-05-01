@@ -16,7 +16,7 @@ def resolve_evidence_path(value: str) -> Path:
 
 
 def main(path: str) -> int:
-    data = json.loads(Path(path).read_text())
+    data = json.loads(Path(path).read_text(encoding="utf-8"))
     failures = []
     expected = {
         "width": 1920,
