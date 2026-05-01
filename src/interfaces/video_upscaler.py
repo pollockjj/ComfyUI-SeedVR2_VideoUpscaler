@@ -4,7 +4,6 @@ Main ComfyUI node for high-quality video upscaling using diffusion models
 """
 
 import torch
-import os
 from comfy_api.latest import io
 from typing import Tuple, Dict, Any, Optional
 from ..utils.constants import get_base_cache_dir, __version__
@@ -377,9 +376,6 @@ class SeedVR2VideoUpscaler(io.ComfyNode):
         # TorchCompile args (optional connection, can be None)
         dit_torch_compile_args = dit.get("torch_compile_args")
         vae_torch_compile_args = vae.get("torch_compile_args")
-        if os.environ.get("PYISOLATE_CHILD") == "1":
-            dit_torch_compile_args = None
-            vae_torch_compile_args = None
         
         # Print header
         debug.print_header()
