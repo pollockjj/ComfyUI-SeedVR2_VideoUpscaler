@@ -18,6 +18,7 @@ def main() -> int:
         "added_packages",
         "removed_packages",
         "host_venv_pollution_detected",
+        "exit_code",
     }
     missing = sorted(required - set(data))
     if missing:
@@ -34,6 +35,9 @@ def main() -> int:
         return 1
     if not isinstance(data["after_freeze"], list) or not data["after_freeze"]:
         print("after_freeze must be a non-empty list", file=sys.stderr)
+        return 1
+    if data["exit_code"] != 0:
+        print(f"pip freeze exit_code is not 0: {data['exit_code']}", file=sys.stderr)
         return 1
     print("host venv pollution validation passed")
     return 0

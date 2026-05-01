@@ -88,6 +88,16 @@ def assert_subset(actual: dict[str, Any], expected: dict[str, Any], label: str) 
             fail(f"{label}.{key} expected {value!r}, got {actual.get(key)!r}")
 
 
+def contains_literal_value(value: Any, expected: Any) -> bool:
+    if value == expected:
+        return True
+    if isinstance(value, dict):
+        return any(contains_literal_value(item, expected) for item in value.values())
+    if isinstance(value, list):
+        return any(contains_literal_value(item, expected) for item in value)
+    return False
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", required=True, type=Path)
@@ -139,7 +149,7 @@ def main() -> int:
     assert_subset(vae["inputs"], EXPECTED_VAE, "vae")
     assert_subset(upscaler["inputs"], EXPECTED_UPSCALER, "upscaler")
     assert_subset(compile_settings["inputs"], EXPECTED_COMPILE, "compile")
-    if "fixed" in json.dumps(api):
+    if contains_literal_value(api, "fixed"):
         fail("hidden UI value 'fixed' is present in API prompt")
 
     save_prefix = save_video["inputs"].get("filename_prefix")
