@@ -9,6 +9,7 @@ from .video_upscaler import SeedVR2VideoUpscaler
 from .dit_model_loader import SeedVR2LoadDiTModel
 from .vae_model_loader import SeedVR2LoadVAEModel
 from .torch_compile_settings import SeedVR2TorchCompileSettings
+from .latent_nodes import SeedVR2VAEEncode, SeedVR2VAEDecode
 
 
 class SeedVR2Extension(ComfyExtension):
@@ -18,6 +19,8 @@ class SeedVR2Extension(ComfyExtension):
         """Return list of all SeedVR2 nodes"""
         return [
             SeedVR2VideoUpscaler,
+            SeedVR2VAEEncode,
+            SeedVR2VAEDecode,
             SeedVR2LoadDiTModel,
             SeedVR2LoadVAEModel,
             SeedVR2TorchCompileSettings,
@@ -31,6 +34,8 @@ async def comfy_entrypoint() -> ComfyExtension:
 
 __all__ = [
     'SeedVR2VideoUpscaler',
+    'SeedVR2VAEEncode',
+    'SeedVR2VAEDecode',
     'SeedVR2LoadDiTModel',
     'SeedVR2LoadVAEModel',
     'SeedVR2TorchCompileSettings',

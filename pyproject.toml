@@ -2,6 +2,7 @@
 name = "seedvr2_videoupscaler"
 description = "SeedVR2 official ComfyUI integration: ByteDance-Seed's one-step diffusion-based video/image upscaling with memory-efficient inference"
 version = "2.5.24"
+requires-python = ">=3.12,<3.13"
 authors = [
     {name = "numz"},
     {name = "adrientoupet"}
@@ -21,6 +22,8 @@ dependencies = [
     "omegaconf>=2.3.0",
     "diffusers>=0.33.1",
     "peft>=0.17.0",
+    "transformers>=4.50.3,<5",
+    "huggingface-hub<1.0",
     "rotary_embedding_torch>=0.5.3",
     "opencv-python",
     "gguf",
@@ -38,3 +41,23 @@ PublisherId = "ainvfx"
 DisplayName = "ComfyUI-SeedVR2_VideoUpscaler"
 Icon = "https://raw.githubusercontent.com/numz/ComfyUI-SeedVR2_VideoUpscaler/refs/heads/main/docs/seedvr_logo.png"
 includes = []
+
+[tool.comfy.isolation]
+can_isolate = true
+share_torch = true
+package_manager = "uv"
+execution_model = "host-coupled"
+share_torch_no_deps = [
+    "safetensors",
+    "numpy",
+    "tqdm",
+    "psutil",
+    "einops",
+    "omegaconf",
+    "diffusers",
+    "peft",
+    "rotary_embedding_torch",
+    "opencv-python",
+    "gguf",
+    "matplotlib",
+]
