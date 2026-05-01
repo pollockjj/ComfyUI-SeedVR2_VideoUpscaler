@@ -38,3 +38,27 @@ PublisherId = "ainvfx"
 DisplayName = "ComfyUI-SeedVR2_VideoUpscaler"
 Icon = "https://raw.githubusercontent.com/numz/ComfyUI-SeedVR2_VideoUpscaler/refs/heads/main/docs/seedvr_logo.png"
 includes = []
+
+[tool.comfy.isolation]
+can_isolate = true
+share_torch = true
+package_manager = "uv"
+execution_model = "host-coupled"
+share_torch_no_deps = [
+    "einops",
+    "antlr4-python3-runtime",
+    "omegaconf",
+    "opencv-python",
+    "numpy",
+    "av",
+    "diffusers",
+    "rotary-embedding-torch",
+    "transformers",
+    "tokenizers",
+    "huggingface-hub",
+    "safetensors",
+    "mediapy",
+    "ipython",
+    "matplotlib",
+    "beartype",
+]
