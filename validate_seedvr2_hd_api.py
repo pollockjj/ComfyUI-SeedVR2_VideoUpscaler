@@ -98,6 +98,14 @@ def assert_subset(actual: dict[str, Any], expected: dict[str, Any], label: str) 
             fail(f"{label}.{key} expected {value!r}, got {actual.get(key)!r}")
 
 
+def contains_literal_value(node: Any, expected: Any) -> bool:
+    if isinstance(node, dict):
+        return any(contains_literal_value(value, expected) for value in node.values())
+    if isinstance(node, list):
+        return any(contains_literal_value(value, expected) for value in node)
+    return node == expected
+
+
 def assert_source_widgets(source: dict[str, Any]) -> None:
     expected_widgets = {
         "SeedVR2TorchCompileSettings": ["inductor", "default", False, False, 64, 128],
@@ -190,7 +198,7 @@ def main() -> int:
     assert_subset(dit["inputs"], EXPECTED_DIT, "dit")
     assert_subset(vae["inputs"], EXPECTED_VAE, "vae")
     assert_subset(upscaler["inputs"], EXPECTED_UPSCALER, "upscaler")
-    if "fixed" in json.dumps(api):
+    if contains_literal_value(api, "fixed"):
         fail("hidden UI value 'fixed' is present in API prompt")
 
     save_prefix = save_video["inputs"].get("filename_prefix")

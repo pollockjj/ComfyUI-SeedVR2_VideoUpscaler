@@ -9,7 +9,8 @@ __version__ = "2.5.24"
 import os
 import warnings
 import inspect
-from typing import Optional
+import re
+from typing import Any, Optional
 
 # Model folder names
 SEEDVR2_FOLDER_NAME = "SEEDVR2" # Physical folder name on disk
@@ -54,6 +55,54 @@ def get_base_cache_dir() -> str:
     return cache_dir
 
 
+def _collect_base_paths_from_yaml_node(node: Any) -> list[str]:
+    if isinstance(node, dict):
+        paths = []
+        for key, value in node.items():
+            if key == "base_path" and isinstance(value, str) and value.strip():
+                paths.append(os.path.expanduser(value.strip()))
+            paths.extend(_collect_base_paths_from_yaml_node(value))
+        return paths
+    if isinstance(node, list):
+        paths = []
+        for item in node:
+            paths.extend(_collect_base_paths_from_yaml_node(item))
+        return paths
+    return []
+
+
+def _fallback_extra_model_base_paths(text: str) -> list[str]:
+    base_path_pattern = re.compile(r"^\s*(?:-\s*)?base_path\s*:\s*(?P<value>.+?)\s*$")
+    paths = []
+    for line in text.splitlines():
+        match = base_path_pattern.match(line)
+        if not match:
+            continue
+        value = match.group("value").split("#", 1)[0].strip()
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
+            value = value[1:-1]
+        if value:
+            paths.append(os.path.expanduser(value))
+    return paths
+
+
+def _extra_model_seedvr2_paths(extra_model_paths: str) -> list[str]:
+    with open(extra_model_paths, "r", encoding="utf-8") as f:
+        text = f.read()
+    try:
+        import yaml
+    except ImportError:
+        base_paths = _fallback_extra_model_base_paths(text)
+    else:
+        try:
+            data = yaml.safe_load(text)
+        except yaml.YAMLError:
+            base_paths = _fallback_extra_model_base_paths(text)
+        else:
+            base_paths = _collect_base_paths_from_yaml_node(data)
+    return [os.path.join(base_path, "models", SEEDVR2_FOLDER_NAME) for base_path in base_paths]
+
+
 def get_all_model_paths() -> list:
     """Get all registered model paths including those from extra_model_paths.yaml (case-insensitive)"""
     try:
@@ -83,13 +132,7 @@ def get_all_model_paths() -> list:
         if models_dir:
             extra_model_paths = os.path.join(os.path.dirname(models_dir), "extra_model_paths.yaml")
             if os.path.exists(extra_model_paths):
-                with open(extra_model_paths, "r") as f:
-                    for line in f:
-                        stripped = line.strip()
-                        if stripped.startswith("base_path:"):
-                            base_path = stripped.split(":", 1)[1].strip()
-                            if base_path:
-                                all_paths.append(os.path.join(base_path, "models", SEEDVR2_FOLDER_NAME))
+                all_paths.extend(_extra_model_seedvr2_paths(extra_model_paths))
         
         # Remove duplicates while preserving order (os.path.normpath handles Windows/Linux path differences)
         seen = set()

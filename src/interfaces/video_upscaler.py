@@ -372,10 +372,15 @@ class SeedVR2VideoUpscaler(io.ComfyNode):
         decode_tile_size = vae.get("decode_tile_size", 512)
         decode_tile_overlap = vae.get("decode_tile_overlap", 64)
         tile_debug = vae.get("tile_debug", False)
-        if tile_debug is False:
+        allowed_tile_debug_values = {"false", "encode", "decode"}
+        if tile_debug is False or tile_debug is None:
             tile_debug = "false"
-        if not isinstance(tile_debug, str):
+        elif isinstance(tile_debug, str):
+            tile_debug = tile_debug.strip().lower()
+        else:
             raise TypeError(f"tile_debug must be one of 'false', 'encode', or 'decode', got {tile_debug!r}")
+        if tile_debug not in allowed_tile_debug_values:
+            raise ValueError(f"tile_debug must be one of 'false', 'encode', or 'decode', got {tile_debug!r}")
 
         # TorchCompile args (optional connection, can be None)
         dit_torch_compile_args = dit.get("torch_compile_args")
