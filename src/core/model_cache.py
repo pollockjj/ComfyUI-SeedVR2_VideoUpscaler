@@ -132,7 +132,7 @@ class GlobalModelCache:
             Node ID string if cached successfully, None if caching disabled
         """
         if not vae_config.get('cache_model', False):
-           return None
+            return None
             
         node_id = _require_cache_node_id(vae_config, "VAE")
         self._vae_models[node_id] = (model, vae_config)
