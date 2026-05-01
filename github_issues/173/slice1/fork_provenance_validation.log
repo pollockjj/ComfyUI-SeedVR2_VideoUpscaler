@@ -1,0 +1,3 @@
+$ python github_issues/173/slice1/validate_fork_provenance.py github_issues/173/slice1/fork_provenance.json
+fork_provenance: valid
+EXIT_CODE: 0

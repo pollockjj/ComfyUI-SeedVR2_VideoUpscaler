@@ -1,0 +1,3 @@
+$ python github_issues/173/slice1/validate_seedvr2_isolation_manifest.py ../ComfyUI/custom_nodes/ComfyUI-SeedVR2_VideoUpscaler/pyproject.toml github_issues/173/slice1/canonical_runtime_requirements.json
+seedvr2_isolation_manifest: valid
+EXIT_CODE: 0

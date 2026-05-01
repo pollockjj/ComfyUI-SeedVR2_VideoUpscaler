@@ -4,9 +4,10 @@ Configure VAE (Variational Autoencoder) model with tiling support
 """
 
 from comfy_api.latest import io
-from comfy_execution.utils import get_executing_context
 from typing import Dict, Any, Tuple
 from ..utils.model_registry import get_available_vae_models, DEFAULT_VAE
+from ..utils.comfy_context import require_node_id_for_cache
+from ..utils.tile_debug import normalize_tile_debug
 from ..optimization.memory_manager import get_device_list
 
 
@@ -122,6 +123,7 @@ class SeedVR2LoadVAEModel(io.ComfyNode):
                         "• 'false': No visualization overlay (default)\n"
                         "• 'encode': Show encoding tile boundaries\n"
                         "• 'decode': Show decoding tile boundaries\n"
+                        "API boolean False is normalized to 'false'.\n"
                         "\n"
                         "Only works when respective tiling is enabled."
                     )
@@ -166,7 +168,7 @@ class SeedVR2LoadVAEModel(io.ComfyNode):
                      cache_model: bool = False, encode_tiled: bool = False,
                      encode_tile_size: int = 512, encode_tile_overlap: int = 64,
                      decode_tiled: bool = False, decode_tile_size: int = 512, 
-                     decode_tile_overlap: int = 64, tile_debug: str = "false",
+                     decode_tile_overlap: int = 64, tile_debug: str | bool = "false",
                      torch_compile_args: Dict[str, Any] = None
                      ) -> io.NodeOutput:
         """
@@ -200,6 +202,8 @@ class SeedVR2LoadVAEModel(io.ComfyNode):
                 "Please set offload_device to specify where the cached VAE model should be stored "
                 "(e.g., 'cpu' or another device). Set cache_model=False if you don't want to cache the model."
             )
+        node_id = require_node_id_for_cache(cache_model, "VAE")
+        tile_debug = normalize_tile_debug(tile_debug)
         
         config = {
             "model": model,
@@ -214,6 +218,6 @@ class SeedVR2LoadVAEModel(io.ComfyNode):
             "decode_tile_overlap": decode_tile_overlap,
             "tile_debug": tile_debug,
             "torch_compile_args": torch_compile_args,
-            "node_id": get_executing_context().node_id,
+            "node_id": node_id,
         }
         return io.NodeOutput(config)

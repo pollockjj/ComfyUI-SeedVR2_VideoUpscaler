@@ -11,20 +11,22 @@ classifiers = [
      "Operating System :: OS Independent"
 ]
 dependencies = [
-    "torch",
-    "torchvision",
-    "safetensors",
+    "torch==2.4.0+cu121",
+    "torchvision==0.19.0+cu121",
+    "safetensors==0.7.0",
     "numpy",
     "tqdm",
     "psutil",
-    "einops",
-    "omegaconf>=2.3.0",
-    "diffusers>=0.33.1",
+    "einops==0.7.0",
+    "antlr4-python3-runtime==4.9.3",
+    "omegaconf==2.3.0",
+    "diffusers==0.29.1",
     "peft>=0.17.0",
-    "rotary_embedding_torch>=0.5.3",
-    "opencv-python",
+    "rotary-embedding-torch==0.5.3",
+    "opencv-python>=4.10.0.84",
     "gguf",
-    "matplotlib"
+    "matplotlib==3.10.9",
+    "beartype==0.22.9"
 ]
 
 [project.urls]
@@ -38,3 +40,27 @@ PublisherId = "ainvfx"
 DisplayName = "ComfyUI-SeedVR2_VideoUpscaler"
 Icon = "https://raw.githubusercontent.com/numz/ComfyUI-SeedVR2_VideoUpscaler/refs/heads/main/docs/seedvr_logo.png"
 includes = []
+
+[tool.comfy.isolation]
+can_isolate = true
+share_torch = true
+package_manager = "uv"
+execution_model = "host-coupled"
+share_torch_no_deps = [
+    "einops",
+    "antlr4-python3-runtime",
+    "omegaconf",
+    "opencv-python",
+    "numpy",
+    "av",
+    "diffusers",
+    "rotary-embedding-torch",
+    "transformers",
+    "tokenizers",
+    "huggingface-hub",
+    "safetensors",
+    "mediapy",
+    "ipython",
+    "matplotlib",
+    "beartype",
+]

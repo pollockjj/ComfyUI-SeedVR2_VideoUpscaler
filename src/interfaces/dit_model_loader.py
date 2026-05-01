@@ -4,9 +4,9 @@ Configure DiT (Diffusion Transformer) model with memory optimization
 """
 
 from comfy_api.latest import io
-from comfy_execution.utils import get_executing_context
 from typing import Dict, Any, Tuple
 from ..utils.model_registry import get_available_dit_models, DEFAULT_DIT
+from ..utils.comfy_context import require_node_id_for_cache
 from ..optimization.memory_manager import get_device_list
 
 
@@ -164,6 +164,7 @@ class SeedVR2LoadDiTModel(io.ComfyNode):
                 "Please set offload_device to specify where the cached DiT model should be stored "
                 "(e.g., 'cpu' or another device). Set cache_model=False if you don't want to cache the model."
             )
+        node_id = require_node_id_for_cache(cache_model, "DiT")
         
         config = {
             "model": model,
@@ -174,7 +175,7 @@ class SeedVR2LoadDiTModel(io.ComfyNode):
             "swap_io_components": swap_io_components,
             "attention_mode": attention_mode,
             "torch_compile_args": torch_compile_args,
-            "node_id": get_executing_context().node_id,
+            "node_id": node_id,
         }
         
         return io.NodeOutput(config)

@@ -1,0 +1,9 @@
+{
+  "output_video_path": "ComfyUI:output/video/issue_173/ComfyUI_00002_.mp4",
+  "size_bytes": 707701,
+  "width": 1920,
+  "height": 1080,
+  "nb_frames": 45,
+  "r_frame_rate": "25/1",
+  "duration": "1.800000"
+}

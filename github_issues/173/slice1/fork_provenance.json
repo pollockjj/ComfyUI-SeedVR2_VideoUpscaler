@@ -1,0 +1,9 @@
+{
+  "upstream_url": "https://github.com/numz/ComfyUI-SeedVR2_VideoUpscaler",
+  "fork_url": "git@github.com:pollockjj/ComfyUI-SeedVR2_VideoUpscaler.git",
+  "target_version": "2.5.24",
+  "starting_commit_sha": "4490bd1f482e026674543386bb2a4d176da245b9",
+  "conversion_branch": "issue_173",
+  "origin_main_sha": "4490bd1f482e026674543386bb2a4d176da245b9",
+  "origin_pyisolate_support_exists": false
+}

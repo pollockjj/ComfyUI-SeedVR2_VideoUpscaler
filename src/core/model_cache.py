@@ -7,6 +7,16 @@ from typing import Dict, Any, Optional, Tuple
 from ..optimization.memory_manager import release_model_memory
 
 
+def _require_cache_node_id(config: Dict[str, Any], model_kind: str) -> str:
+    node_id = config.get('node_id')
+    if node_id is None:
+        raise ValueError(
+            f"{model_kind} cache access requires a non-None node_id when "
+            "cache_model=True."
+        )
+    return str(node_id)
+
+
 class GlobalModelCache:
     """
     Global cache for sharing DiT and VAE models independently across upscaler instances.
@@ -36,7 +46,7 @@ class GlobalModelCache:
         if not dit_config.get('cache_model', False):
             return None
             
-        node_id = dit_config.get('node_id')
+        node_id = _require_cache_node_id(dit_config, "DiT")
         if node_id in self._dit_models:
             model, stored_config = self._dit_models[node_id]
             return model
@@ -56,7 +66,7 @@ class GlobalModelCache:
         if not vae_config.get('cache_model', False):
             return None
             
-        node_id = vae_config.get('node_id')
+        node_id = _require_cache_node_id(vae_config, "VAE")
         if node_id in self._vae_models:
             model, stored_config = self._vae_models[node_id]
             return model
@@ -99,7 +109,7 @@ class GlobalModelCache:
         if not dit_config.get('cache_model', False):
             return None
             
-        node_id = dit_config.get('node_id')
+        node_id = _require_cache_node_id(dit_config, "DiT")
         self._dit_models[node_id] = (model, dit_config)
         
         if debug:
@@ -122,9 +132,9 @@ class GlobalModelCache:
             Node ID string if cached successfully, None if caching disabled
         """
         if not vae_config.get('cache_model', False):
-           return None
+            return None
             
-        node_id = vae_config.get('node_id')
+        node_id = _require_cache_node_id(vae_config, "VAE")
         self._vae_models[node_id] = (model, vae_config)
         
         if debug:
@@ -175,6 +185,8 @@ class GlobalModelCache:
             Also removes any runner templates that used this DiT model
         """
         node_id = dit_config.get('node_id')
+        if node_id is not None:
+            node_id = str(node_id)
         if node_id in self._dit_models:
             if debug:
                 debug.log(f"Removing cached DiT: {node_id}", category="cache", force=True)
@@ -210,6 +222,8 @@ class GlobalModelCache:
             Also removes any runner templates that used this VAE model
         """
         node_id = vae_config.get('node_id')
+        if node_id is not None:
+            node_id = str(node_id)
         if node_id in self._vae_models:
             if debug:
                 debug.log(f"Removing cached VAE: {node_id}", category="cache", force=True)

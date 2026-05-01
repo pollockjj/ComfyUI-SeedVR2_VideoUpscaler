@@ -166,7 +166,6 @@ def download_with_resume(url: str, filepath: str, debug=None) -> bool:
 def download_weight(dit_model: str, vae_model: str, model_dir: Optional[str] = None, debug=None) -> bool:
     """Download SeedVR2 DiT and VAE models with integrity checking"""
     cache_dir = model_dir or get_base_cache_dir()
-    os.makedirs(cache_dir, exist_ok=True)
     
     files_to_download = [
         (dit_model, MODEL_REGISTRY.get(dit_model)),
@@ -235,6 +234,7 @@ def download_weight(dit_model: str, vae_model: str, model_dir: Optional[str] = N
                     save_validation_cache(cache, cache_dir)
         
         # Download file
+        os.makedirs(cache_dir, exist_ok=True)
         url = HUGGINGFACE_BASE_URL.format(repo=repo, filename=filename)
         temp_file = f"{filepath}.download"
         
@@ -256,8 +256,8 @@ def download_weight(dit_model: str, vae_model: str, model_dir: Optional[str] = N
                              category="download", force=True)
             
             if download_with_resume(url, filepath, debug):
-                # Validate downloaded file
-                if validate_file(filepath, expected_hash):
+                # Validate downloaded file against the same cache root used by this run.
+                if validate_file(filepath, expected_hash, cache_dir):
                     if debug:
                         debug.log(f"Downloaded and validated: {filename}", 
                                  category="success", force=True)

@@ -38,7 +38,21 @@ def ensure_flash_attn_safe():
     Pre-test flash_attn package; stub if DLL is broken.
     Prevents diffusers from crashing when flash_attn has broken DLLs.
     """
+    def _patch_transformers_distribution_mapping():
+        try:
+            from transformers.utils import import_utils
+        except (ImportError, AttributeError):
+            return
+        distribution_mapping = getattr(import_utils, 'PACKAGE_DISTRIBUTION_MAPPING', None)
+        if distribution_mapping is not None:
+            distribution_mapping['flash_attn'] = ['flash-attn', 'flash_attn']
+        is_flash_attn_2_available = getattr(import_utils, 'is_flash_attn_2_available', None)
+        cache_clear = getattr(is_flash_attn_2_available, 'cache_clear', None)
+        if callable(cache_clear):
+            cache_clear()
+
     if 'flash_attn' in sys.modules:
+        _patch_transformers_distribution_mapping()
         return  # Already loaded
     
     try:
@@ -50,10 +64,12 @@ def ensure_flash_attn_safe():
         stub.__file__ = None
         stub.__path__ = []
         stub.__loader__ = None
+        stub.__version__ = "0.0.0"
         # Provide attributes that diffusers/transformers import
         stub.flash_attn_func = None
         stub.flash_attn_varlen_func = None
         sys.modules['flash_attn'] = stub
+        _patch_transformers_distribution_mapping()
 
 
 def ensure_xformers_flash_compat():

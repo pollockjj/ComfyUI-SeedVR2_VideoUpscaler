@@ -1,0 +1,10 @@
+{
+  "manifest_share_torch": true,
+  "execution_model": "host-coupled",
+  "exit_code": 0,
+  "torch_share_passed": true,
+  "sealed_worker_used": false,
+  "harness_run_artifact_dir": "mydevelopment:temp_artifacts/comfyui_run_25sog6hd",
+  "output_video_path": "ComfyUI:output/video/issue_173/ComfyUI_00002_.mp4",
+  "raw_harness_log": "mydevelopment:github_issues/173/slice3/run_debug_output_no_compile_workflow.log"
+}

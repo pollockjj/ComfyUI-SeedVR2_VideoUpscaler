@@ -9,6 +9,7 @@ from typing import Tuple, Dict, Any, Optional
 from ..utils.constants import get_base_cache_dir, __version__
 from ..utils.downloads import download_weight
 from ..utils.debug import Debug
+from ..utils.tile_debug import normalize_tile_debug
 from ..core.generation_phases import (
     encode_all_batches, 
     upscale_all_batches, 
@@ -371,7 +372,7 @@ class SeedVR2VideoUpscaler(io.ComfyNode):
         decode_tiled = vae.get("decode_tiled", False)
         decode_tile_size = vae.get("decode_tile_size", 512)
         decode_tile_overlap = vae.get("decode_tile_overlap", 64)
-        tile_debug = vae.get("tile_debug", False)
+        tile_debug = normalize_tile_debug(vae.get("tile_debug", False))
 
         # TorchCompile args (optional connection, can be None)
         dit_torch_compile_args = dit.get("torch_compile_args")
@@ -575,6 +576,6 @@ class SeedVR2VideoUpscaler(io.ComfyNode):
             # V3-compatible return with optional UI preview
             return io.NodeOutput(sample)
             
-        except Exception as e:
+        except Exception:
             cleanup(dit_cache=dit_cache, vae_cache=vae_cache)
-            raise e
+            raise
