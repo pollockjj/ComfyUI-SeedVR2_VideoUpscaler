@@ -42,6 +42,14 @@ EXPECTED = {
         "offload_device": "cpu",
         "enable_debug": False,
     },
+    "compile": {
+        "backend": "inductor",
+        "mode": "default",
+        "fullgraph": False,
+        "dynamic": False,
+        "dynamo_cache_size_limit": 64,
+        "dynamo_recompile_limit": 128,
+    },
 }
 
 

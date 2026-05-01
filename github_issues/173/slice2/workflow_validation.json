@@ -89,6 +89,14 @@
     "images"
   ],
   "settings_preserved": {
+    "compile": {
+      "backend": "inductor",
+      "dynamic": false,
+      "dynamo_cache_size_limit": 64,
+      "dynamo_recompile_limit": 128,
+      "fullgraph": false,
+      "mode": "default"
+    },
     "dit": {
       "attention_mode": "sdpa",
       "blocks_to_swap": 32,

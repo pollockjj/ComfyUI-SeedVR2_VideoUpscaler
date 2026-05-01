@@ -10,7 +10,6 @@
     "torch_share_smoke": "github_issues/173/slice3/torch_share_smoke.json",
     "output_video_ffprobe": "github_issues/173/slice3/output_video_ffprobe.json",
     "host_venv_pollution": "github_issues/173/slice4/host_venv_pollution.json",
-    "node_registration_log": "/home/johnj/dev_cuda_1/mydevelopment/temp_artifacts/comfyui_run_25sog6hd/delta_log_filtered.txt",
-    "repo_hygiene": "github_issues/173/slice4/repo_hygiene.txt"
+    "node_registration_log": "/home/johnj/dev_cuda_1/mydevelopment/temp_artifacts/comfyui_run_25sog6hd/delta_log_filtered.txt"
   }
 }

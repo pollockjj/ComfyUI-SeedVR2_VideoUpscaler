@@ -55,6 +55,14 @@ EXPECTED_UPSCALER = {
     "offload_device": "cpu",
     "enable_debug": False,
 }
+EXPECTED_COMPILE = {
+    "backend": "inductor",
+    "mode": "default",
+    "fullgraph": False,
+    "dynamic": False,
+    "dynamo_cache_size_limit": 64,
+    "dynamo_recompile_limit": 128,
+}
 
 
 def load_json(path: Path) -> Any:
@@ -104,7 +112,7 @@ def main() -> int:
     save_id, save_video = node_by_class(api, "SaveVideo")
     dit_id, dit = node_by_class(api, "SeedVR2LoadDiTModel")
     vae_id, vae = node_by_class(api, "SeedVR2LoadVAEModel")
-    compile_id, _ = node_by_class(api, "SeedVR2TorchCompileSettings")
+    compile_id, compile_settings = node_by_class(api, "SeedVR2TorchCompileSettings")
 
     if components["inputs"].get("video") != [load_video_id, 0]:
         fail("GetVideoComponents.video is not wired from LoadVideo")
@@ -130,6 +138,7 @@ def main() -> int:
     assert_subset(dit["inputs"], EXPECTED_DIT, "dit")
     assert_subset(vae["inputs"], EXPECTED_VAE, "vae")
     assert_subset(upscaler["inputs"], EXPECTED_UPSCALER, "upscaler")
+    assert_subset(compile_settings["inputs"], EXPECTED_COMPILE, "compile")
     if "fixed" in json.dumps(api):
         fail("hidden UI value 'fixed' is present in API prompt")
 
@@ -156,6 +165,7 @@ def main() -> int:
             "dit": EXPECTED_DIT,
             "vae": EXPECTED_VAE,
             "upscaler": EXPECTED_UPSCALER,
+            "compile": EXPECTED_COMPILE,
             "hidden_fixed_absent": True,
         },
         "node_ids": {

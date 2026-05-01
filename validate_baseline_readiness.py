@@ -12,7 +12,7 @@ EXPECTED = {
     "isolated_smoke_passed": True,
     "output_video_validated": True,
     "node_registration_present": True,
-    "repo_hygiene_clean": True,
+    "submitted_branch_provenance_verified": True,
     "sealed_worker_fallback_used": False,
 }
 
