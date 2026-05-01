@@ -6,6 +6,14 @@ from pathlib import Path
 
 
 EXPECTED = {
+    "compile": {
+        "backend": "inductor",
+        "mode": "default",
+        "fullgraph": False,
+        "dynamic": False,
+        "dynamo_cache_size_limit": 64,
+        "dynamo_recompile_limit": 128,
+    },
     "dit": {
         "model": "seedvr2_ema_3b_fp16.safetensors",
         "device": "cuda:0",
@@ -24,7 +32,7 @@ EXPECTED = {
         "decode_tiled": True,
         "decode_tile_size": 768,
         "decode_tile_overlap": 128,
-        "tile_debug": False,
+        "tile_debug": "false",
         "offload_device": "cpu",
         "cache_model": False,
     },

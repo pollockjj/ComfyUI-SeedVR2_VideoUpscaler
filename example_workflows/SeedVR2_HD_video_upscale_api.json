@@ -31,6 +31,10 @@
   "13": {
     "class_type": "SeedVR2LoadVAEModel",
     "inputs": {
+      "torch_compile_args": [
+        "19",
+        0
+      ],
       "model": "ema_vae_fp16.safetensors",
       "device": "cuda:0",
       "encode_tiled": true,
@@ -39,7 +43,7 @@
       "decode_tiled": true,
       "decode_tile_size": 768,
       "decode_tile_overlap": 128,
-      "tile_debug": false,
+      "tile_debug": "false",
       "offload_device": "cpu",
       "cache_model": false
     }
@@ -47,6 +51,10 @@
   "14": {
     "class_type": "SeedVR2LoadDiTModel",
     "inputs": {
+      "torch_compile_args": [
+        "19",
+        0
+      ],
       "model": "seedvr2_ema_3b_fp16.safetensors",
       "device": "cuda:0",
       "blocks_to_swap": 32,
@@ -54,6 +62,17 @@
       "offload_device": "cpu",
       "cache_model": false,
       "attention_mode": "sdpa"
+    }
+  },
+  "19": {
+    "class_type": "SeedVR2TorchCompileSettings",
+    "inputs": {
+      "backend": "inductor",
+      "mode": "default",
+      "fullgraph": false,
+      "dynamic": false,
+      "dynamo_cache_size_limit": 64,
+      "dynamo_recompile_limit": 128
     }
   },
   "21": {

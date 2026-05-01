@@ -10,6 +10,7 @@ from typing import Any
 REQUIRED_CLASS_TYPES = [
     "LoadVideo",
     "GetVideoComponents",
+    "SeedVR2TorchCompileSettings",
     "SeedVR2LoadDiTModel",
     "SeedVR2LoadVAEModel",
     "SeedVR2VideoUpscaler",
@@ -18,6 +19,14 @@ REQUIRED_CLASS_TYPES = [
 ]
 FORBIDDEN_CLASS_TYPES = ["Note", "JoinImageWithAlpha"]
 
+EXPECTED_COMPILE = {
+    "backend": "inductor",
+    "mode": "default",
+    "fullgraph": False,
+    "dynamic": False,
+    "dynamo_cache_size_limit": 64,
+    "dynamo_recompile_limit": 128,
+}
 EXPECTED_DIT = {
     "model": "seedvr2_ema_3b_fp16.safetensors",
     "device": "cuda:0",
@@ -36,7 +45,7 @@ EXPECTED_VAE = {
     "decode_tiled": True,
     "decode_tile_size": 768,
     "decode_tile_overlap": 128,
-    "tile_debug": False,
+    "tile_debug": "false",
     "offload_device": "cpu",
     "cache_model": False,
 }
@@ -73,10 +82,67 @@ def node_by_class(api: dict[str, Any], class_type: str) -> tuple[str, dict[str, 
     return matches[0]
 
 
+def source_node_by_type(source: dict[str, Any], node_type: str) -> dict[str, Any]:
+    nodes = source.get("nodes")
+    if not isinstance(nodes, list):
+        fail("source workflow does not contain a nodes list")
+    matches = [node for node in nodes if node.get("type") == node_type]
+    if len(matches) != 1:
+        fail(f"source expected exactly one {node_type}, found {len(matches)}")
+    return matches[0]
+
+
 def assert_subset(actual: dict[str, Any], expected: dict[str, Any], label: str) -> None:
     for key, value in expected.items():
         if actual.get(key) != value:
             fail(f"{label}.{key} expected {value!r}, got {actual.get(key)!r}")
+
+
+def assert_source_widgets(source: dict[str, Any]) -> None:
+    expected_widgets = {
+        "SeedVR2TorchCompileSettings": ["inductor", "default", False, False, 64, 128],
+        "SeedVR2LoadDiTModel": [
+            EXPECTED_DIT["model"],
+            EXPECTED_DIT["device"],
+            EXPECTED_DIT["blocks_to_swap"],
+            EXPECTED_DIT["swap_io_components"],
+            EXPECTED_DIT["offload_device"],
+            EXPECTED_DIT["cache_model"],
+            EXPECTED_DIT["attention_mode"],
+        ],
+        "SeedVR2LoadVAEModel": [
+            EXPECTED_VAE["model"],
+            EXPECTED_VAE["device"],
+            EXPECTED_VAE["encode_tiled"],
+            EXPECTED_VAE["encode_tile_size"],
+            EXPECTED_VAE["encode_tile_overlap"],
+            EXPECTED_VAE["decode_tiled"],
+            EXPECTED_VAE["decode_tile_size"],
+            EXPECTED_VAE["decode_tile_overlap"],
+            EXPECTED_VAE["tile_debug"],
+            EXPECTED_VAE["offload_device"],
+            EXPECTED_VAE["cache_model"],
+        ],
+        "SeedVR2VideoUpscaler": [
+            EXPECTED_UPSCALER["seed"],
+            "fixed",
+            EXPECTED_UPSCALER["resolution"],
+            EXPECTED_UPSCALER["max_resolution"],
+            EXPECTED_UPSCALER["batch_size"],
+            EXPECTED_UPSCALER["uniform_batch_size"],
+            EXPECTED_UPSCALER["color_correction"],
+            EXPECTED_UPSCALER["temporal_overlap"],
+            EXPECTED_UPSCALER["prepend_frames"],
+            EXPECTED_UPSCALER["input_noise_scale"],
+            EXPECTED_UPSCALER["latent_noise_scale"],
+            EXPECTED_UPSCALER["offload_device"],
+            EXPECTED_UPSCALER["enable_debug"],
+        ],
+    }
+    for node_type, expected in expected_widgets.items():
+        actual = source_node_by_type(source, node_type).get("widgets_values")
+        if actual != expected:
+            fail(f"source {node_type} widgets expected {expected!r}, got {actual!r}")
 
 
 def main() -> int:
@@ -88,6 +154,7 @@ def main() -> int:
 
     source = load_json(args.source)
     api = load_json(args.api)
+    assert_source_widgets(source)
 
     class_types = sorted(node["class_type"] for node in api.values())
     if class_types != sorted(REQUIRED_CLASS_TYPES):
@@ -97,12 +164,17 @@ def main() -> int:
         fail(f"forbidden class_type entries present: {forbidden_present}")
 
     upscaler_id, upscaler = node_by_class(api, "SeedVR2VideoUpscaler")
-    components_id, components = node_by_class(api, "GetVideoComponents")
+    components_id, _ = node_by_class(api, "GetVideoComponents")
     create_id, create_video = node_by_class(api, "CreateVideo")
-    save_id, save_video = node_by_class(api, "SaveVideo")
+    _, save_video = node_by_class(api, "SaveVideo")
+    compile_id, compile_settings = node_by_class(api, "SeedVR2TorchCompileSettings")
     _, dit = node_by_class(api, "SeedVR2LoadDiTModel")
     _, vae = node_by_class(api, "SeedVR2LoadVAEModel")
 
+    if dit["inputs"].get("torch_compile_args") != [compile_id, 0]:
+        fail("SeedVR2LoadDiTModel.torch_compile_args is not wired from SeedVR2TorchCompileSettings")
+    if vae["inputs"].get("torch_compile_args") != [compile_id, 0]:
+        fail("SeedVR2LoadVAEModel.torch_compile_args is not wired from SeedVR2TorchCompileSettings")
     if upscaler["inputs"].get("image") != [components_id, 0]:
         fail("SeedVR2VideoUpscaler.image is not wired from GetVideoComponents.images")
     if create_video["inputs"].get("images") != [upscaler_id, 0]:
@@ -114,6 +186,7 @@ def main() -> int:
     if save_video["inputs"].get("video") != [create_id, 0]:
         fail("SaveVideo.video is not wired from CreateVideo")
 
+    assert_subset(compile_settings["inputs"], EXPECTED_COMPILE, "compile")
     assert_subset(dit["inputs"], EXPECTED_DIT, "dit")
     assert_subset(vae["inputs"], EXPECTED_VAE, "vae")
     assert_subset(upscaler["inputs"], EXPECTED_UPSCALER, "upscaler")
@@ -121,6 +194,8 @@ def main() -> int:
         fail("hidden UI value 'fixed' is present in API prompt")
 
     save_prefix = save_video["inputs"].get("filename_prefix")
+    if not isinstance(save_prefix, str):
+        fail(f"SaveVideo.filename_prefix must be a string, got: {save_prefix!r}")
     if not (save_prefix.startswith("video/ComfyUI") or save_prefix.startswith("video/issue_173")):
         fail(f"invalid SaveVideo prefix: {save_prefix!r}")
 
@@ -140,12 +215,15 @@ def main() -> int:
         },
         "save_video_prefix": save_prefix,
         "settings_preserved": {
+            "compile": EXPECTED_COMPILE,
             "dit": EXPECTED_DIT,
             "vae": EXPECTED_VAE,
             "upscaler": EXPECTED_UPSCALER,
             "hidden_fixed_absent": True,
         },
         "direct_links": {
+            "SeedVR2LoadDiTModel.torch_compile_args": dit["inputs"]["torch_compile_args"],
+            "SeedVR2LoadVAEModel.torch_compile_args": vae["inputs"]["torch_compile_args"],
             "SeedVR2VideoUpscaler.image": upscaler["inputs"]["image"],
             "CreateVideo.images": create_video["inputs"]["images"],
             "CreateVideo.audio": create_video["inputs"]["audio"],

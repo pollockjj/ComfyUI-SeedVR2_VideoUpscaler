@@ -22,6 +22,9 @@ def main() -> int:
     if missing:
         print(f"missing keys: {missing}", file=sys.stderr)
         return 1
+    if data.get("exit_code") != 0:
+        print(f"pip freeze exit_code is not 0: {data.get('exit_code')!r}", file=sys.stderr)
+        return 1
     if data["host_venv_pollution_detected"] is not False:
         print("host_venv_pollution_detected is not false", file=sys.stderr)
         return 1

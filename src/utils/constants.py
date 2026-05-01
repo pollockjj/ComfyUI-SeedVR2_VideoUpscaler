@@ -65,6 +65,7 @@ def get_all_model_paths() -> list:
         # This handles any case variation users might use in extra_model_paths.yaml
         all_paths = []
         target_lower = SEEDVR2_MODEL_TYPE.lower()
+        models_roots = set()
         
         # folder_paths.folder_names_and_paths is the underlying dict: {type: ([paths], extensions)}
         if hasattr(folder_paths, 'folder_names_and_paths'):
@@ -74,7 +75,9 @@ def get_all_model_paths() -> list:
                 for path in paths:
                     models_root = os.path.dirname(path)
                     if os.path.basename(models_root).lower() == "models":
-                        all_paths.append(os.path.join(models_root, SEEDVR2_FOLDER_NAME))
+                        models_roots.add(os.path.normpath(models_root))
+            for models_root in sorted(models_roots, key=str.lower):
+                all_paths.append(os.path.join(models_root, SEEDVR2_FOLDER_NAME))
 
         models_dir = getattr(folder_paths, 'models_dir', None)
         if models_dir:

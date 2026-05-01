@@ -119,8 +119,8 @@ class SeedVR2LoadVAEModel(io.ComfyNode):
                     )
                 ),
                 io.Combo.Input("tile_debug",
-                    options=[False, "encode", "decode"],
-                    default=False,
+                    options=["false", "encode", "decode"],
+                    default="false",
                     optional=True,
                     tooltip=(
                         "Tile debug visualization mode:\n"
@@ -171,7 +171,7 @@ class SeedVR2LoadVAEModel(io.ComfyNode):
                      cache_model: bool = False, encode_tiled: bool = False,
                      encode_tile_size: int = 512, encode_tile_overlap: int = 64,
                      decode_tiled: bool = False, decode_tile_size: int = 512, 
-                     decode_tile_overlap: int = 64, tile_debug: str | bool = False,
+                     decode_tile_overlap: int = 64, tile_debug: str | bool = "false",
                      torch_compile_args: Dict[str, Any] = None
                      ) -> io.NodeOutput:
         """
@@ -205,6 +205,10 @@ class SeedVR2LoadVAEModel(io.ComfyNode):
                 "Please set offload_device to specify where the cached VAE model should be stored "
                 "(e.g., 'cpu' or another device). Set cache_model=False if you don't want to cache the model."
             )
+        if tile_debug is False:
+            tile_debug = "false"
+        if not isinstance(tile_debug, str):
+            raise TypeError(f"tile_debug must be one of 'false', 'encode', or 'decode', got {tile_debug!r}")
         
         config = {
             "model": model,

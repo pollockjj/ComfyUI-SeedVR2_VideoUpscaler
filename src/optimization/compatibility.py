@@ -44,7 +44,10 @@ def ensure_flash_attn_safe():
         except (ImportError, AttributeError):
             return
         import_utils.PACKAGE_DISTRIBUTION_MAPPING.setdefault('flash_attn', ['flash_attn'])
-        import_utils.is_flash_attn_2_available.cache_clear()
+        is_flash_attn_2_available = getattr(import_utils, 'is_flash_attn_2_available', None)
+        cache_clear = getattr(is_flash_attn_2_available, 'cache_clear', None)
+        if callable(cache_clear):
+            cache_clear()
 
     if 'flash_attn' in sys.modules:
         _patch_transformers_distribution_mapping()
