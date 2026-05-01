@@ -40,7 +40,14 @@ def main() -> int:
         fail("input video height mismatch")
     if video.get("r_frame_rate") != EXPECTED["r_frame_rate"]:
         fail("input video frame rate mismatch")
-    if int(video.get("nb_frames")) != EXPECTED["nb_frames"]:
+    nb_frames = video.get("nb_frames")
+    if nb_frames is None:
+        fail("input video frame count missing")
+    try:
+        nb_frames = int(nb_frames)
+    except (TypeError, ValueError):
+        fail("input video frame count is not a valid integer")
+    if nb_frames != EXPECTED["nb_frames"]:
         fail("input video frame count mismatch")
 
     bundled = data.get("bundled_assets", {})
