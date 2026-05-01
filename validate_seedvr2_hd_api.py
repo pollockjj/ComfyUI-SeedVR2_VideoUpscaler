@@ -10,9 +10,9 @@ from typing import Any
 REQUIRED_CLASS_TYPES = [
     "LoadVideo",
     "GetVideoComponents",
-    "SeedVR2TorchCompileSettings",
     "SeedVR2LoadDiTModel",
     "SeedVR2LoadVAEModel",
+    "SeedVR2TorchCompileSettings",
     "SeedVR2VideoUpscaler",
     "CreateVideo",
     "SaveVideo",
@@ -175,7 +175,7 @@ def main() -> int:
     load_video_id, _ = node_by_class(api, "LoadVideo")
     components_id, components = node_by_class(api, "GetVideoComponents")
     create_id, create_video = node_by_class(api, "CreateVideo")
-    _, save_video = node_by_class(api, "SaveVideo")
+    save_id, save_video = node_by_class(api, "SaveVideo")
     compile_id, compile_settings = node_by_class(api, "SeedVR2TorchCompileSettings")
     dit_id, dit = node_by_class(api, "SeedVR2LoadDiTModel")
     vae_id, vae = node_by_class(api, "SeedVR2LoadVAEModel")
@@ -235,6 +235,16 @@ def main() -> int:
             "vae": EXPECTED_VAE,
             "upscaler": EXPECTED_UPSCALER,
             "hidden_fixed_absent": True,
+        },
+        "node_ids": {
+            "LoadVideo": load_video_id,
+            "GetVideoComponents": components_id,
+            "SeedVR2LoadDiTModel": dit_id,
+            "SeedVR2LoadVAEModel": vae_id,
+            "SeedVR2TorchCompileSettings": compile_id,
+            "SeedVR2VideoUpscaler": upscaler_id,
+            "CreateVideo": create_id,
+            "SaveVideo": save_id,
         },
         "direct_links": {
             "GetVideoComponents.video": components["inputs"]["video"],

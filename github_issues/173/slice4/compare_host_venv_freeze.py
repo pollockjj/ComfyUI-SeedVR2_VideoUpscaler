@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 
@@ -11,10 +12,20 @@ def resolve_python(requested: str) -> str:
     if requested != "python":
         return requested
     workspace = Path(__file__).resolve().parents[3]
-    host_python = workspace.parent / "ComfyUI" / ".venv" / "bin" / "python"
-    if host_python.exists():
-        return str(host_python)
-    return requested
+    candidates = [workspace.parent / "ComfyUI" / ".venv" / "bin" / "python"]
+    for parent in Path(__file__).resolve().parents:
+        if parent.name == "ComfyUI":
+            candidates.append(parent / ".venv" / "bin" / "python")
+            break
+    for candidate in candidates:
+        if candidate.exists():
+            return str(candidate)
+    print(
+        "FAIL: --python python did not resolve to a slot-local host venv interpreter: "
+        + ", ".join(str(candidate) for candidate in candidates),
+        file=sys.stderr,
+    )
+    raise SystemExit(1)
 
 
 def freeze_lines(text: str) -> list[str]:
