@@ -1,6 +1,6 @@
 $ python github_issues/173/slice1/capture_host_venv_freeze.py --python python --out github_issues/173/slice1/host_venv_freeze_before.txt
-# RESOLVED_PYTHON: /home/johnj/dev_cuda_1/ComfyUI/.venv/bin/python
-# PIP_FREEZE_COMMAND: /home/johnj/dev_cuda_1/ComfyUI/.venv/bin/python -m pip freeze
+# RESOLVED_PYTHON: ComfyUI:.venv/bin/python
+# PIP_FREEZE_COMMAND: ComfyUI:.venv/bin/python -m pip freeze
 EXIT_CODE: 0
 
 aiofiles==24.1.0

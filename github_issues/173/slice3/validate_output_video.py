@@ -3,6 +3,18 @@ import sys
 from pathlib import Path
 
 
+REPO_ROOT = Path(__file__).resolve().parents[3]
+COMFY_ROOT = REPO_ROOT.parents[1]
+
+
+def resolve_evidence_path(value: str) -> Path:
+    if value.startswith("ComfyUI:"):
+        return COMFY_ROOT / value.removeprefix("ComfyUI:")
+    if value.startswith("custom_node:"):
+        return REPO_ROOT / value.removeprefix("custom_node:")
+    return Path(value)
+
+
 def main(path: str) -> int:
     data = json.loads(Path(path).read_text())
     failures = []
@@ -20,7 +32,7 @@ def main(path: str) -> int:
     output_video_path = data.get("output_video_path")
     if not output_video_path:
         failures.append("output_video_path: missing")
-    elif not Path(output_video_path).exists():
+    elif not resolve_evidence_path(output_video_path).exists():
         failures.append(f"output_video_path: path does not exist: {output_video_path}")
     if failures:
         print("FAIL")

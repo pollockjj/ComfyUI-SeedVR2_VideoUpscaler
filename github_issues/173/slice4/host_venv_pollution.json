@@ -142,7 +142,7 @@
   "command": "/usr/bin/python github_issues/173/slice4/compare_host_venv_freeze.py --before github_issues/173/slice1/host_venv_freeze_before.txt --python python --out github_issues/173/slice4/host_venv_pollution.json",
   "exit_code": 0,
   "host_venv_pollution_detected": false,
-  "pip_freeze_command": "/home/johnj/dev_cuda_1/ComfyUI/.venv/bin/python -m pip freeze",
+  "pip_freeze_command": "ComfyUI:.venv/bin/python -m pip freeze",
   "removed_packages": [],
-  "resolved_python": "/home/johnj/dev_cuda_1/ComfyUI/.venv/bin/python"
+  "resolved_python": "ComfyUI:.venv/bin/python"
 }

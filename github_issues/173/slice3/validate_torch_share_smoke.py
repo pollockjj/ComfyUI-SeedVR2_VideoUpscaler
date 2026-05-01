@@ -3,6 +3,23 @@ import sys
 from pathlib import Path
 
 
+REPO_ROOT = Path(__file__).resolve().parents[3]
+COMFY_ROOT = REPO_ROOT.parents[1]
+MYDEVELOPMENT_ROOT = COMFY_ROOT.parent / "mydevelopment"
+
+
+def resolve_evidence_path(value: str) -> Path:
+    prefixes = {
+        "ComfyUI:": COMFY_ROOT,
+        "mydevelopment:": MYDEVELOPMENT_ROOT,
+        "custom_node:": REPO_ROOT,
+    }
+    for prefix, root in prefixes.items():
+        if value.startswith(prefix):
+            return root / value.removeprefix(prefix)
+    return Path(value)
+
+
 def main(path: str) -> int:
     data = json.loads(Path(path).read_text())
     expected = {
@@ -20,7 +37,7 @@ def main(path: str) -> int:
         value = data.get(key)
         if not value:
             failures.append(f"{key}: missing")
-        elif not Path(value).exists():
+        elif not resolve_evidence_path(value).exists():
             failures.append(f"{key}: path does not exist: {value}")
     if failures:
         print("FAIL")
