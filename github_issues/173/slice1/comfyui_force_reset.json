@@ -1,0 +1,6 @@
+{
+  "upstream_pyisolate_support_sha": "61dbc1aeb7b69a0ee41521d56f36cedd573291f4",
+  "origin_pyisolate_support_sha_after_reset": "61dbc1aeb7b69a0ee41521d56f36cedd573291f4",
+  "local_head_after_reset": "61dbc1aeb7b69a0ee41521d56f36cedd573291f4",
+  "binary_equal": true
+}

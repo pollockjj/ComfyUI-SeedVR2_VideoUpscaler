@@ -1,0 +1,131 @@
+{
+  "api_class_types": [
+    "CreateVideo",
+    "GetVideoComponents",
+    "LoadVideo",
+    "SaveVideo",
+    "SeedVR2LoadDiTModel",
+    "SeedVR2LoadVAEModel",
+    "SeedVR2TorchCompileSettings",
+    "SeedVR2VideoUpscaler"
+  ],
+  "api_workflow": "github_issues/173/workflows/seedvr2_hd_video_upscale_api.json",
+  "create_video_inputs": {
+    "audio": "GetVideoComponents.audio",
+    "fps": "GetVideoComponents.fps",
+    "images": "SeedVR2VideoUpscaler"
+  },
+  "direct_links": {
+    "CreateVideo.audio": [
+      "22",
+      1
+    ],
+    "CreateVideo.fps": [
+      "22",
+      2
+    ],
+    "CreateVideo.images": [
+      "10",
+      0
+    ],
+    "GetVideoComponents.video": [
+      "21",
+      0
+    ],
+    "SaveVideo.video": [
+      "24",
+      0
+    ],
+    "SeedVR2LoadDiTModel.torch_compile_args": [
+      "19",
+      0
+    ],
+    "SeedVR2LoadVAEModel.torch_compile_args": [
+      "19",
+      0
+    ],
+    "SeedVR2VideoUpscaler.dit": [
+      "14",
+      0
+    ],
+    "SeedVR2VideoUpscaler.image": [
+      "22",
+      0
+    ],
+    "SeedVR2VideoUpscaler.vae": [
+      "13",
+      0
+    ]
+  },
+  "forbidden_class_types": [
+    "Note",
+    "JoinImageWithAlpha"
+  ],
+  "join_image_with_alpha_present": false,
+  "node_ids": {
+    "CreateVideo": "24",
+    "GetVideoComponents": "22",
+    "LoadVideo": "21",
+    "SaveVideo": "23",
+    "SeedVR2LoadDiTModel": "14",
+    "SeedVR2LoadVAEModel": "13",
+    "SeedVR2TorchCompileSettings": "19",
+    "SeedVR2VideoUpscaler": "10"
+  },
+  "note_nodes_present": false,
+  "required_class_types": [
+    "LoadVideo",
+    "GetVideoComponents",
+    "SeedVR2LoadDiTModel",
+    "SeedVR2LoadVAEModel",
+    "SeedVR2TorchCompileSettings",
+    "SeedVR2VideoUpscaler",
+    "CreateVideo",
+    "SaveVideo"
+  ],
+  "save_video_prefix": "video/issue_173/ComfyUI",
+  "seedvr2_image_source": [
+    "GetVideoComponents",
+    "images"
+  ],
+  "settings_preserved": {
+    "dit": {
+      "attention_mode": "sdpa",
+      "blocks_to_swap": 32,
+      "cache_model": false,
+      "device": "cuda:0",
+      "model": "seedvr2_ema_3b_fp16.safetensors",
+      "offload_device": "cpu",
+      "swap_io_components": false
+    },
+    "hidden_fixed_absent": true,
+    "upscaler": {
+      "batch_size": 33,
+      "color_correction": "lab",
+      "enable_debug": false,
+      "input_noise_scale": 0,
+      "latent_noise_scale": 0,
+      "max_resolution": 0,
+      "offload_device": "cpu",
+      "prepend_frames": 0,
+      "resolution": 1080,
+      "seed": 42,
+      "temporal_overlap": 3,
+      "uniform_batch_size": true
+    },
+    "vae": {
+      "cache_model": false,
+      "decode_tile_overlap": 128,
+      "decode_tile_size": 768,
+      "decode_tiled": true,
+      "device": "cuda:0",
+      "encode_tile_overlap": 128,
+      "encode_tile_size": 1024,
+      "encode_tiled": true,
+      "model": "ema_vae_fp16.safetensors",
+      "offload_device": "cpu",
+      "tile_debug": "false"
+    }
+  },
+  "source_workflow": "example_workflows/SeedVR2_HD_video_upscale.json"
+}

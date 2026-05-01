@@ -7,6 +7,7 @@ from comfy_api.latest import io
 from typing import Dict, Any, Tuple
 from ..utils.model_registry import get_available_vae_models, DEFAULT_VAE
 from ..utils.comfy_context import get_current_node_id
+from ..utils.tile_debug import normalize_tile_debug
 from ..optimization.memory_manager import get_device_list
 
 
@@ -200,15 +201,7 @@ class SeedVR2LoadVAEModel(io.ComfyNode):
                 "Please set offload_device to specify where the cached VAE model should be stored "
                 "(e.g., 'cpu' or another device). Set cache_model=False if you don't want to cache the model."
             )
-        valid_tile_debug_modes = {"false", "encode", "decode"}
-        if tile_debug is False or tile_debug is None:
-            tile_debug = "false"
-        elif isinstance(tile_debug, str):
-            tile_debug = tile_debug.strip().lower()
-        else:
-            raise TypeError(f"tile_debug must be one of 'false', 'encode', or 'decode', got {tile_debug!r}")
-        if tile_debug not in valid_tile_debug_modes:
-            raise ValueError(f"tile_debug must be one of 'false', 'encode', or 'decode', got {tile_debug!r}")
+        tile_debug = normalize_tile_debug(tile_debug)
         
         config = {
             "model": model,

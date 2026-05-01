@@ -9,6 +9,7 @@ from typing import Tuple, Dict, Any, Optional
 from ..utils.constants import get_base_cache_dir, __version__
 from ..utils.downloads import download_weight
 from ..utils.debug import Debug
+from ..utils.tile_debug import normalize_tile_debug
 from ..core.generation_phases import (
     encode_all_batches, 
     upscale_all_batches, 
@@ -371,16 +372,7 @@ class SeedVR2VideoUpscaler(io.ComfyNode):
         decode_tiled = vae.get("decode_tiled", False)
         decode_tile_size = vae.get("decode_tile_size", 512)
         decode_tile_overlap = vae.get("decode_tile_overlap", 64)
-        tile_debug = vae.get("tile_debug", False)
-        allowed_tile_debug_values = {"false", "encode", "decode"}
-        if tile_debug is False or tile_debug is None:
-            tile_debug = "false"
-        elif isinstance(tile_debug, str):
-            tile_debug = tile_debug.strip().lower()
-        else:
-            raise TypeError(f"tile_debug must be one of 'false', 'encode', or 'decode', got {tile_debug!r}")
-        if tile_debug not in allowed_tile_debug_values:
-            raise ValueError(f"tile_debug must be one of 'false', 'encode', or 'decode', got {tile_debug!r}")
+        tile_debug = normalize_tile_debug(vae.get("tile_debug", False))
 
         # TorchCompile args (optional connection, can be None)
         dit_torch_compile_args = dit.get("torch_compile_args")

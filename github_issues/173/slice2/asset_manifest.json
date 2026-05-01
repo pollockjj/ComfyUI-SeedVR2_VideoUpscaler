@@ -1,0 +1,33 @@
+{
+  "input_video": {
+    "name": "Mustache_640x360.mp4",
+    "source_path": "/home/johnj/dev_cuda_1/ComfyUI/custom_nodes/ComfyUI-SeedVR2_VideoUpscaler/example_workflows/example_inputs/Mustache_640x360.mp4",
+    "stage_path": "/home/johnj/dev_cuda_1/ComfyUI/input/Mustache_640x360.mp4",
+    "sha256": "21581bc8454e234e3d3f833172bb358215f47d33cfcf5fc12f3dd0dff3319d1d",
+    "width": 640,
+    "height": 360,
+    "r_frame_rate": "25/1",
+    "duration": "1.800000",
+    "nb_frames": 45
+  },
+  "model_hashes": {
+    "seedvr2_ema_3b_fp16.safetensors": {
+      "registry_path": "/home/johnj/dev_cuda_1/ComfyUI/custom_nodes/ComfyUI-SeedVR2_VideoUpscaler/src/utils/model_registry.py",
+      "registry_sha256": "2fd0e03a3dad24e07086750360727ca437de4ecd456f769856e960ae93e2b304"
+    },
+    "ema_vae_fp16.safetensors": {
+      "registry_path": "/home/johnj/dev_cuda_1/ComfyUI/custom_nodes/ComfyUI-SeedVR2_VideoUpscaler/src/utils/model_registry.py",
+      "registry_sha256": "20678548f420d98d26f11442d3528f8b8c94e57ee046ef93dbb7633da8612ca1"
+    }
+  },
+  "bundled_assets": {
+    "pos_emb.pt": {
+      "path": "/home/johnj/dev_cuda_1/ComfyUI/custom_nodes/ComfyUI-SeedVR2_VideoUpscaler/pos_emb.pt",
+      "sha256": "fa07a14844314772266b66c3b95deb0027696d8fe7065721263db5176f45d799"
+    },
+    "neg_emb.pt": {
+      "path": "/home/johnj/dev_cuda_1/ComfyUI/custom_nodes/ComfyUI-SeedVR2_VideoUpscaler/neg_emb.pt",
+      "sha256": "6a43e5800ef2354f1c156d27535834da055cbec8248298b8923492bba2076581"
+    }
+  }
+}
