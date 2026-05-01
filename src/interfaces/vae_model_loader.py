@@ -10,6 +10,11 @@ from ..utils.model_registry import get_available_vae_models, DEFAULT_VAE
 from ..optimization.memory_manager import get_device_list
 
 
+def _get_current_node_id():
+    context = get_executing_context()
+    return context.node_id if context is not None else None
+
+
 class SeedVR2LoadVAEModel(io.ComfyNode):
     """
     Configure VAE (Variational Autoencoder) model loader with tiling support
@@ -114,12 +119,12 @@ class SeedVR2LoadVAEModel(io.ComfyNode):
                     )
                 ),
                 io.Combo.Input("tile_debug",
-                    options=["false", "encode", "decode"],
-                    default="false",
+                    options=[False, "encode", "decode"],
+                    default=False,
                     optional=True,
                     tooltip=(
                         "Tile debug visualization mode:\n"
-                        "• 'false': No visualization overlay (default)\n"
+                        "• false: No visualization overlay (default)\n"
                         "• 'encode': Show encoding tile boundaries\n"
                         "• 'decode': Show decoding tile boundaries\n"
                         "\n"
@@ -166,7 +171,7 @@ class SeedVR2LoadVAEModel(io.ComfyNode):
                      cache_model: bool = False, encode_tiled: bool = False,
                      encode_tile_size: int = 512, encode_tile_overlap: int = 64,
                      decode_tiled: bool = False, decode_tile_size: int = 512, 
-                     decode_tile_overlap: int = 64, tile_debug: str = "false",
+                     decode_tile_overlap: int = 64, tile_debug: str | bool = False,
                      torch_compile_args: Dict[str, Any] = None
                      ) -> io.NodeOutput:
         """
@@ -214,6 +219,6 @@ class SeedVR2LoadVAEModel(io.ComfyNode):
             "decode_tile_overlap": decode_tile_overlap,
             "tile_debug": tile_debug,
             "torch_compile_args": torch_compile_args,
-            "node_id": get_executing_context().node_id,
+            "node_id": _get_current_node_id(),
         }
         return io.NodeOutput(config)

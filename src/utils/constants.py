@@ -71,6 +71,22 @@ def get_all_model_paths() -> list:
             for folder_type, (paths, _) in folder_paths.folder_names_and_paths.items():
                 if folder_type.lower() == target_lower:
                     all_paths.extend(paths)
+                for path in paths:
+                    models_root = os.path.dirname(path)
+                    if os.path.basename(models_root).lower() == "models":
+                        all_paths.append(os.path.join(models_root, SEEDVR2_FOLDER_NAME))
+
+        models_dir = getattr(folder_paths, 'models_dir', None)
+        if models_dir:
+            extra_model_paths = os.path.join(os.path.dirname(models_dir), "extra_model_paths.yaml")
+            if os.path.exists(extra_model_paths):
+                with open(extra_model_paths, "r") as f:
+                    for line in f:
+                        stripped = line.strip()
+                        if stripped.startswith("base_path:"):
+                            base_path = stripped.split(":", 1)[1].strip()
+                            if base_path:
+                                all_paths.append(os.path.join(base_path, "models", SEEDVR2_FOLDER_NAME))
         
         # Remove duplicates while preserving order (os.path.normpath handles Windows/Linux path differences)
         seen = set()
