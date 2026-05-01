@@ -82,6 +82,13 @@ def node_by_class(api: dict[str, Any], class_type: str) -> tuple[str, dict[str, 
     return matches[0]
 
 
+def node_inputs(node_id: str, node: dict[str, Any], class_type: str) -> dict[str, Any]:
+    inputs = node.get("inputs")
+    if not isinstance(inputs, dict):
+        fail(f"{class_type} node {node_id!r} must contain object inputs, got {type(inputs).__name__}")
+    return inputs
+
+
 def source_node_by_type(source: dict[str, Any], node_type: str) -> dict[str, Any]:
     nodes = source.get("nodes")
     if not isinstance(nodes, list):
@@ -187,7 +194,7 @@ def main() -> int:
         fail(f"class_type set mismatch: {class_types}")
 
     upscaler_id, upscaler = node_by_class(api, "SeedVR2VideoUpscaler")
-    load_video_id, _ = node_by_class(api, "LoadVideo")
+    load_video_id, load_video = node_by_class(api, "LoadVideo")
     components_id, components = node_by_class(api, "GetVideoComponents")
     create_id, create_video = node_by_class(api, "CreateVideo")
     save_id, save_video = node_by_class(api, "SaveVideo")
@@ -195,35 +202,44 @@ def main() -> int:
     dit_id, dit = node_by_class(api, "SeedVR2LoadDiTModel")
     vae_id, vae = node_by_class(api, "SeedVR2LoadVAEModel")
 
-    if components["inputs"].get("video") != [load_video_id, 0]:
+    node_inputs(load_video_id, load_video, "LoadVideo")
+    components_inputs = node_inputs(components_id, components, "GetVideoComponents")
+    compile_inputs = node_inputs(compile_id, compile_settings, "SeedVR2TorchCompileSettings")
+    dit_inputs = node_inputs(dit_id, dit, "SeedVR2LoadDiTModel")
+    vae_inputs = node_inputs(vae_id, vae, "SeedVR2LoadVAEModel")
+    upscaler_inputs = node_inputs(upscaler_id, upscaler, "SeedVR2VideoUpscaler")
+    create_video_inputs = node_inputs(create_id, create_video, "CreateVideo")
+    save_video_inputs = node_inputs(save_id, save_video, "SaveVideo")
+
+    if components_inputs.get("video") != [load_video_id, 0]:
         fail("GetVideoComponents.video is not wired from LoadVideo")
-    if dit["inputs"].get("torch_compile_args") != [compile_id, 0]:
+    if dit_inputs.get("torch_compile_args") != [compile_id, 0]:
         fail("SeedVR2LoadDiTModel.torch_compile_args is not wired from SeedVR2TorchCompileSettings")
-    if vae["inputs"].get("torch_compile_args") != [compile_id, 0]:
+    if vae_inputs.get("torch_compile_args") != [compile_id, 0]:
         fail("SeedVR2LoadVAEModel.torch_compile_args is not wired from SeedVR2TorchCompileSettings")
-    if upscaler["inputs"].get("image") != [components_id, 0]:
+    if upscaler_inputs.get("image") != [components_id, 0]:
         fail("SeedVR2VideoUpscaler.image is not wired from GetVideoComponents.images")
-    if upscaler["inputs"].get("dit") != [dit_id, 0]:
+    if upscaler_inputs.get("dit") != [dit_id, 0]:
         fail("SeedVR2VideoUpscaler.dit is not wired from SeedVR2LoadDiTModel")
-    if upscaler["inputs"].get("vae") != [vae_id, 0]:
+    if upscaler_inputs.get("vae") != [vae_id, 0]:
         fail("SeedVR2VideoUpscaler.vae is not wired from SeedVR2LoadVAEModel")
-    if create_video["inputs"].get("images") != [upscaler_id, 0]:
+    if create_video_inputs.get("images") != [upscaler_id, 0]:
         fail("CreateVideo.images is not wired from SeedVR2VideoUpscaler")
-    if create_video["inputs"].get("audio") != [components_id, 1]:
+    if create_video_inputs.get("audio") != [components_id, 1]:
         fail("CreateVideo.audio is not wired from GetVideoComponents.audio")
-    if create_video["inputs"].get("fps") != [components_id, 2]:
+    if create_video_inputs.get("fps") != [components_id, 2]:
         fail("CreateVideo.fps is not wired from GetVideoComponents.fps")
-    if save_video["inputs"].get("video") != [create_id, 0]:
+    if save_video_inputs.get("video") != [create_id, 0]:
         fail("SaveVideo.video is not wired from CreateVideo")
 
-    assert_subset(compile_settings["inputs"], EXPECTED_COMPILE, "compile")
-    assert_subset(dit["inputs"], EXPECTED_DIT, "dit")
-    assert_subset(vae["inputs"], EXPECTED_VAE, "vae")
-    assert_subset(upscaler["inputs"], EXPECTED_UPSCALER, "upscaler")
+    assert_subset(compile_inputs, EXPECTED_COMPILE, "compile")
+    assert_subset(dit_inputs, EXPECTED_DIT, "dit")
+    assert_subset(vae_inputs, EXPECTED_VAE, "vae")
+    assert_subset(upscaler_inputs, EXPECTED_UPSCALER, "upscaler")
     if contains_literal_value(api, "fixed"):
         fail("hidden UI value 'fixed' is present in API prompt")
 
-    save_prefix = save_video["inputs"].get("filename_prefix")
+    save_prefix = save_video_inputs.get("filename_prefix")
     if not isinstance(save_prefix, str):
         fail(f"SaveVideo.filename_prefix must be a string, got: {save_prefix!r}")
     if not (save_prefix.startswith("video/ComfyUI") or save_prefix.startswith("video/issue_173")):
@@ -262,16 +278,16 @@ def main() -> int:
             "SaveVideo": save_id,
         },
         "direct_links": {
-            "GetVideoComponents.video": components["inputs"]["video"],
-            "SeedVR2LoadDiTModel.torch_compile_args": dit["inputs"]["torch_compile_args"],
-            "SeedVR2LoadVAEModel.torch_compile_args": vae["inputs"]["torch_compile_args"],
-            "SeedVR2VideoUpscaler.image": upscaler["inputs"]["image"],
-            "SeedVR2VideoUpscaler.dit": upscaler["inputs"]["dit"],
-            "SeedVR2VideoUpscaler.vae": upscaler["inputs"]["vae"],
-            "CreateVideo.images": create_video["inputs"]["images"],
-            "CreateVideo.audio": create_video["inputs"]["audio"],
-            "CreateVideo.fps": create_video["inputs"]["fps"],
-            "SaveVideo.video": save_video["inputs"]["video"],
+            "GetVideoComponents.video": components_inputs["video"],
+            "SeedVR2LoadDiTModel.torch_compile_args": dit_inputs["torch_compile_args"],
+            "SeedVR2LoadVAEModel.torch_compile_args": vae_inputs["torch_compile_args"],
+            "SeedVR2VideoUpscaler.image": upscaler_inputs["image"],
+            "SeedVR2VideoUpscaler.dit": upscaler_inputs["dit"],
+            "SeedVR2VideoUpscaler.vae": upscaler_inputs["vae"],
+            "CreateVideo.images": create_video_inputs["images"],
+            "CreateVideo.audio": create_video_inputs["audio"],
+            "CreateVideo.fps": create_video_inputs["fps"],
+            "SaveVideo.video": save_video_inputs["video"],
         },
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)
