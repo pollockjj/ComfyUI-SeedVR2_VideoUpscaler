@@ -86,8 +86,11 @@ def _fallback_extra_model_base_paths(text: str) -> list[str]:
 
 
 def _extra_model_seedvr2_paths(extra_model_paths: str) -> list[str]:
-    with open(extra_model_paths, "r", encoding="utf-8") as f:
-        text = f.read()
+    try:
+        with open(extra_model_paths, "r", encoding="utf-8") as f:
+            text = f.read()
+    except OSError:
+        return []
     try:
         import yaml
     except ImportError:
@@ -95,7 +98,7 @@ def _extra_model_seedvr2_paths(extra_model_paths: str) -> list[str]:
     else:
         try:
             data = yaml.safe_load(text)
-        except yaml.YAMLError:
+        except (TypeError, ValueError, yaml.YAMLError):
             base_paths = _fallback_extra_model_base_paths(text)
         else:
             base_paths = _collect_base_paths_from_yaml_node(data)
@@ -106,45 +109,55 @@ def get_all_model_paths() -> list:
     """Get all registered model paths including those from extra_model_paths.yaml (case-insensitive)"""
     try:
         import folder_paths
-        # Ensure default path is registered first
-        get_base_cache_dir()
-        
-        # Case-insensitive lookup: search through all registered folder types
-        # This handles any case variation users might use in extra_model_paths.yaml
-        all_paths = []
-        target_lower = SEEDVR2_MODEL_TYPE.lower()
-        models_roots = set()
-        
-        # folder_paths.folder_names_and_paths is the underlying dict: {type: ([paths], extensions)}
-        if hasattr(folder_paths, 'folder_names_and_paths'):
-            for folder_type, (paths, _) in folder_paths.folder_names_and_paths.items():
-                if folder_type.lower() == target_lower:
-                    all_paths.extend(paths)
-                for path in paths:
-                    models_root = os.path.dirname(path)
-                    if os.path.basename(models_root).lower() == "models":
-                        models_roots.add(os.path.normpath(models_root))
-            for models_root in sorted(models_roots, key=str.lower):
-                all_paths.append(os.path.join(models_root, SEEDVR2_FOLDER_NAME))
-
-        models_dir = getattr(folder_paths, 'models_dir', None)
-        if models_dir:
-            extra_model_paths = os.path.join(os.path.dirname(models_dir), "extra_model_paths.yaml")
-            if os.path.exists(extra_model_paths):
-                all_paths.extend(_extra_model_seedvr2_paths(extra_model_paths))
-        
-        # Remove duplicates while preserving order (os.path.normpath handles Windows/Linux path differences)
-        seen = set()
-        unique_paths = []
-        for path in all_paths:
-            normalized = os.path.normpath(path.lower())
-            if normalized not in seen:
-                seen.add(normalized)
-                unique_paths.append(path)
-        
-        return unique_paths if unique_paths else [get_base_cache_dir()]
-    except:
+    except ImportError:
         return [get_base_cache_dir()]
+
+    # Ensure default path is registered first.
+    get_base_cache_dir()
+
+    # Case-insensitive lookup: search through all registered folder types.
+    # This handles any case variation users might use in extra_model_paths.yaml.
+    all_paths = []
+    target_lower = SEEDVR2_MODEL_TYPE.lower()
+    models_roots = set()
+
+    # folder_paths.folder_names_and_paths is the underlying dict: {type: ([paths], extensions)}.
+    folder_registry = getattr(folder_paths, 'folder_names_and_paths', {})
+    if not isinstance(folder_registry, dict):
+        folder_registry = {}
+    for folder_type, registry_entry in folder_registry.items():
+        try:
+            paths, _ = registry_entry
+        except (TypeError, ValueError):
+            continue
+        if not isinstance(paths, (list, tuple, set)):
+            continue
+        valid_paths = [path for path in paths if isinstance(path, str)]
+        if str(folder_type).lower() == target_lower:
+            all_paths.extend(valid_paths)
+        for path in valid_paths:
+            models_root = os.path.dirname(path)
+            if os.path.basename(models_root).lower() == "models":
+                models_roots.add(os.path.normpath(models_root))
+    for models_root in sorted(models_roots, key=str.lower):
+        all_paths.append(os.path.join(models_root, SEEDVR2_FOLDER_NAME))
+
+    models_dir = getattr(folder_paths, 'models_dir', None)
+    if models_dir:
+        extra_model_paths = os.path.join(os.path.dirname(models_dir), "extra_model_paths.yaml")
+        if os.path.exists(extra_model_paths):
+            all_paths.extend(_extra_model_seedvr2_paths(extra_model_paths))
+
+    # Remove duplicates while preserving order (os.path.normpath handles Windows/Linux path differences).
+    seen = set()
+    unique_paths = []
+    for path in all_paths:
+        normalized = os.path.normpath(path.lower())
+        if normalized not in seen:
+            seen.add(normalized)
+            unique_paths.append(path)
+
+    return unique_paths if unique_paths else [get_base_cache_dir()]
 
 
 def get_all_model_files() -> dict:
