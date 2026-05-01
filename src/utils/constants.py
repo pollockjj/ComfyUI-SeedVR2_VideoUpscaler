@@ -8,7 +8,6 @@ __version__ = "2.5.24"
 
 import os
 import warnings
-import inspect
 import re
 from typing import Any, Optional
 

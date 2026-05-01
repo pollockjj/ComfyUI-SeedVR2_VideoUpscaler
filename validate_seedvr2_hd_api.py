@@ -165,11 +165,11 @@ def main() -> int:
     assert_source_widgets(source)
 
     class_types = sorted(node["class_type"] for node in api.values())
-    if class_types != sorted(REQUIRED_CLASS_TYPES):
-        fail(f"class_type set mismatch: {class_types}")
     forbidden_present = sorted(set(class_types) & set(FORBIDDEN_CLASS_TYPES))
     if forbidden_present:
         fail(f"forbidden class_type entries present: {forbidden_present}")
+    if class_types != sorted(REQUIRED_CLASS_TYPES):
+        fail(f"class_type set mismatch: {class_types}")
 
     upscaler_id, upscaler = node_by_class(api, "SeedVR2VideoUpscaler")
     components_id, _ = node_by_class(api, "GetVideoComponents")

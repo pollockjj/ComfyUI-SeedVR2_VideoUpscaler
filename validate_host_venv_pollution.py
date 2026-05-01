@@ -17,6 +17,7 @@ def main() -> int:
         "added_packages",
         "removed_packages",
         "host_venv_pollution_detected",
+        "exit_code",
     }
     missing = sorted(required - set(data))
     if missing:
