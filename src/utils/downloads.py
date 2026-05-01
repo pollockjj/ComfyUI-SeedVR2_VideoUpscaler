@@ -256,8 +256,8 @@ def download_weight(dit_model: str, vae_model: str, model_dir: Optional[str] = N
                              category="download", force=True)
             
             if download_with_resume(url, filepath, debug):
-                # Validate downloaded file
-                if validate_file(filepath, expected_hash):
+                # Validate downloaded file against the same cache root used by this run.
+                if validate_file(filepath, expected_hash, cache_dir):
                     if debug:
                         debug.log(f"Downloaded and validated: {filename}", 
                                  category="success", force=True)

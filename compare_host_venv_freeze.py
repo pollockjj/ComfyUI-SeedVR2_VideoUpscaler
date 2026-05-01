@@ -9,6 +9,7 @@ from pathlib import Path
 
 def freeze_lines(text: str) -> list[str]:
     ignored_prefixes = ("$", "EXIT_CODE:", "STDERR:")
+    retained_requirement_markers = ("==", " @ ")
     lines = []
     for line in text.splitlines():
         line = line.strip()
@@ -17,6 +18,15 @@ def freeze_lines(text: str) -> list[str]:
         if any(line.startswith(prefix) for prefix in ignored_prefixes):
             continue
         if line.startswith("#"):
+            continue
+        if line.startswith("-e ") or line.startswith("--editable "):
+            lines.append(line)
+            continue
+        if "://" in line:
+            lines.append(line)
+            continue
+        if not any(marker in line for marker in retained_requirement_markers):
+            lines.append(line)
             continue
         lines.append(line)
     return sorted(lines, key=str.lower)
