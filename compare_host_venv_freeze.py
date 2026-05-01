@@ -16,7 +16,7 @@ def freeze_lines(text: str) -> list[str]:
             continue
         if any(line.startswith(prefix) for prefix in ignored_prefixes):
             continue
-        if "==" not in line and " @ " not in line:
+        if line.startswith("#"):
             continue
         lines.append(line)
     return sorted(lines, key=str.lower)

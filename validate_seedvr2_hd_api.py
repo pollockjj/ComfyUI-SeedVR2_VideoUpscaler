@@ -172,19 +172,26 @@ def main() -> int:
         fail(f"class_type set mismatch: {class_types}")
 
     upscaler_id, upscaler = node_by_class(api, "SeedVR2VideoUpscaler")
-    components_id, _ = node_by_class(api, "GetVideoComponents")
+    load_video_id, _ = node_by_class(api, "LoadVideo")
+    components_id, components = node_by_class(api, "GetVideoComponents")
     create_id, create_video = node_by_class(api, "CreateVideo")
     _, save_video = node_by_class(api, "SaveVideo")
     compile_id, compile_settings = node_by_class(api, "SeedVR2TorchCompileSettings")
-    _, dit = node_by_class(api, "SeedVR2LoadDiTModel")
-    _, vae = node_by_class(api, "SeedVR2LoadVAEModel")
+    dit_id, dit = node_by_class(api, "SeedVR2LoadDiTModel")
+    vae_id, vae = node_by_class(api, "SeedVR2LoadVAEModel")
 
+    if components["inputs"].get("video") != [load_video_id, 0]:
+        fail("GetVideoComponents.video is not wired from LoadVideo")
     if dit["inputs"].get("torch_compile_args") != [compile_id, 0]:
         fail("SeedVR2LoadDiTModel.torch_compile_args is not wired from SeedVR2TorchCompileSettings")
     if vae["inputs"].get("torch_compile_args") != [compile_id, 0]:
         fail("SeedVR2LoadVAEModel.torch_compile_args is not wired from SeedVR2TorchCompileSettings")
     if upscaler["inputs"].get("image") != [components_id, 0]:
         fail("SeedVR2VideoUpscaler.image is not wired from GetVideoComponents.images")
+    if upscaler["inputs"].get("dit") != [dit_id, 0]:
+        fail("SeedVR2VideoUpscaler.dit is not wired from SeedVR2LoadDiTModel")
+    if upscaler["inputs"].get("vae") != [vae_id, 0]:
+        fail("SeedVR2VideoUpscaler.vae is not wired from SeedVR2LoadVAEModel")
     if create_video["inputs"].get("images") != [upscaler_id, 0]:
         fail("CreateVideo.images is not wired from SeedVR2VideoUpscaler")
     if create_video["inputs"].get("audio") != [components_id, 1]:
@@ -230,9 +237,12 @@ def main() -> int:
             "hidden_fixed_absent": True,
         },
         "direct_links": {
+            "GetVideoComponents.video": components["inputs"]["video"],
             "SeedVR2LoadDiTModel.torch_compile_args": dit["inputs"]["torch_compile_args"],
             "SeedVR2LoadVAEModel.torch_compile_args": vae["inputs"]["torch_compile_args"],
             "SeedVR2VideoUpscaler.image": upscaler["inputs"]["image"],
+            "SeedVR2VideoUpscaler.dit": upscaler["inputs"]["dit"],
+            "SeedVR2VideoUpscaler.vae": upscaler["inputs"]["vae"],
             "CreateVideo.images": create_video["inputs"]["images"],
             "CreateVideo.audio": create_video["inputs"]["audio"],
             "CreateVideo.fps": create_video["inputs"]["fps"],
