@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -43,6 +44,10 @@ def freeze_lines(text: str) -> list[str]:
     return sorted(lines, key=str.lower)
 
 
+def shell_command(parts: list[str]) -> str:
+    return " ".join(shlex.quote(part) for part in parts)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--before", required=True, type=Path)
@@ -51,8 +56,9 @@ def main() -> int:
     args = parser.parse_args()
 
     before = freeze_lines(args.before.read_text(encoding="utf-8"))
+    resolved_python = resolve_python(args.python)
     result = subprocess.run(
-        [resolve_python(args.python), "-m", "pip", "freeze"],
+        [resolved_python, "-m", "pip", "freeze"],
         capture_output=True,
         text=True,
         check=False,
@@ -66,7 +72,9 @@ def main() -> int:
         "added_packages": added,
         "removed_packages": removed,
         "host_venv_pollution_detected": bool(added or removed),
-        "command": "python github_issues/173/slice4/compare_host_venv_freeze.py --before github_issues/173/slice1/host_venv_freeze_before.txt --python python --out github_issues/173/slice4/host_venv_pollution.json",
+        "command": shell_command([sys.executable, *sys.argv]),
+        "resolved_python": resolved_python,
+        "pip_freeze_command": shell_command([resolved_python, "-m", "pip", "freeze"]),
         "exit_code": result.returncode,
     }
     if result.stderr.strip():
